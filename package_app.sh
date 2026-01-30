@@ -76,7 +76,6 @@ chmod +x "${MACOS_DIR}/${EXECUTABLE_NAME}"
 # 复制图标文件
 echo "复制图标文件..."
 cp "AppIcon.icns" "${RESOURCES_DIR}/"
-echo "✅ 图标已复制: ${RESOURCES_DIR}/AppIcon.icns"
 
 # 复制 entitlements 文件
 cp "MacroRecorder.entitlements" "${CONTENTS_DIR}/"
@@ -123,13 +122,12 @@ cat > "${CONTENTS_DIR}/Info.plist" << EOF
 </plist>
 EOF
 
-# 使用 SetFile 设置自定义图标（备用方法）
-if command -v SetFile &> /dev/null; then
-    echo "设置自定义图标..."
-    SetFile -t ICNS "${RESOURCES_DIR}/AppIcon.icns" 2>/dev/null || true
-    SetFile -a C "${APP_DIR}" 2>/dev/null || true
-    echo "✅ 自定义图标设置完成"
+# 编译并运行图标设置工具
+echo "设置自定义图标..."
+if [ ! -f "seticon" ]; then
+    swiftc seticon.swift -o seticon
 fi
+./seticon "AppIcon.icns" "${APP_DIR}"
 
 echo ""
 echo "==========================================="
