@@ -2,7 +2,8 @@
 
 set -e
 
-APP_NAME="MacroRecorder"
+APP_NAME="行为录制精灵"
+EXECUTABLE_NAME="MacroRecorder"
 BUILD_DIR=".build/debug"
 APP_DIR="${APP_NAME}.app"
 CONTENTS_DIR="${APP_DIR}/Contents"
@@ -10,7 +11,7 @@ MACOS_DIR="${CONTENTS_DIR}/MacOS"
 RESOURCES_DIR="${CONTENTS_DIR}/Resources"
 VERSION="2.0"
 
-echo "=== 打包 MacroRecorder 应用 v${VERSION} ==="
+echo "=== 打包 ${APP_NAME} 应用 v${VERSION} ==="
 
 # 清理旧的 app
 if [ -d "${APP_DIR}" ]; then
@@ -23,7 +24,7 @@ echo "构建项目..."
 swift build
 
 # 获取可执行文件路径
-EXECUTABLE_PATH=$(swift build --show-bin-path)/${APP_NAME}
+EXECUTABLE_PATH=$(swift build --show-bin-path)/${EXECUTABLE_NAME}
 
 if [ ! -f "${EXECUTABLE_PATH}" ]; then
     echo "错误: 找不到可执行文件 ${EXECUTABLE_PATH}"
@@ -39,18 +40,19 @@ mkdir -p "${RESOURCES_DIR}"
 mkdir -p "${RESOURCES_DIR}/Assets.xcassets/AppIcon.appiconset"
 
 # 复制可执行文件
-cp "${EXECUTABLE_PATH}" "${MACOS_DIR}/${APP_NAME}"
-chmod +x "${MACOS_DIR}/${APP_NAME}"
+cp "${EXECUTABLE_PATH}" "${MACOS_DIR}/${EXECUTABLE_NAME}"
+chmod +x "${MACOS_DIR}/${EXECUTABLE_NAME}"
 
 # 复制图标资源
 cp "Assets.xcassets/Contents.json" "${RESOURCES_DIR}/Assets.xcassets/"
 cp "Assets.xcassets/AppIcon.appiconset/Contents.json" "${RESOURCES_DIR}/Assets.xcassets/AppIcon.appiconset/"
-if [ -f "Assets.xcassets/AppIcon.appiconset/Frame 74.png" ]; then
-    cp "Assets.xcassets/AppIcon.appiconset/Frame 74.png" "${RESOURCES_DIR}/Assets.xcassets/AppIcon.appiconset/"
+if [ -f "Assets.xcassets/AppIcon.appiconset/AppIcon.png" ]; then
+    cp "Assets.xcassets/AppIcon.appiconset/AppIcon.png" "${RESOURCES_DIR}/Assets.xcassets/AppIcon.appiconset/"
+    echo "✅ 图标已复制"
 fi
 
 # 复制 entitlements 文件
-cp "${APP_NAME}.entitlements" "${CONTENTS_DIR}/"
+cp "MacroRecorder.entitlements" "${CONTENTS_DIR}/"
 
 # 创建 Info.plist
 cat > "${CONTENTS_DIR}/Info.plist" << EOF
@@ -60,14 +62,16 @@ cat > "${CONTENTS_DIR}/Info.plist" << EOF
 <dict>
     <key>CFBundleDevelopmentRegion</key>
     <string>zh_CN</string>
+    <key>CFBundleDisplayName</key>
+    <string>${APP_NAME}</string>
     <key>CFBundleExecutable</key>
-    <string>MacroRecorder</string>
+    <string>${EXECUTABLE_NAME}</string>
     <key>CFBundleIdentifier</key>
     <string>com.macro.MacroRecorder</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>MacroRecorder</string>
+    <string>${APP_NAME}</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
@@ -85,15 +89,12 @@ cat > "${CONTENTS_DIR}/Info.plist" << EOF
     <key>LSApplicationCategoryType</key>
     <string>public.app-category.utilities</string>
     <key>CFBundleIconFile</key>
-    <string></string>
+    <string>AppIcon</string>
     <key>NSRequiresAquaSystemAppearance</key>
     <false/>
 </dict>
 </plist>
 EOF
-
-# 创建默认的Assets.car（空图标）
-echo "创建应用图标资源..."
 
 echo ""
 echo "==========================================="
@@ -101,6 +102,7 @@ echo "     打包完成! ✅"
 echo "==========================================="
 echo ""
 echo "📦 应用位置: $(pwd)/${APP_DIR}"
+echo "📱 应用名称: ${APP_NAME}"
 echo ""
 echo "✨ 新功能:"
 echo "   • 支持深色模式自动适配"

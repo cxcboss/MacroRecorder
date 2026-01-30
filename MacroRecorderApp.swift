@@ -6,7 +6,7 @@ struct MacroRecorderApp: App {
     @StateObject private var viewModel = MacroViewModel()
     
     var body: some Scene {
-        Window("Macro Recorder", id: "main") {
+        Window("行为录制精灵", id: "main") {
             ContentView()
                 .environmentObject(viewModel)
         }

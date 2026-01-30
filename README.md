@@ -1,8 +1,8 @@
-# MacroRecorder - 鼠标宏录制工具
+# 行为录制精灵 - 鼠标宏录制工具
 
 <div align="center">
 
-![MacroRecorder](Assets.xcassets/AppIcon.appiconset/Frame%2074.png)
+![行为录制精灵](Assets.xcassets/AppIcon.appiconset/AppIcon.png)
 
 [![macOS](https://img.shields.io/badge/macOS-13.0%2B-blue)](https://www.apple.com/macos/)
 [![Swift](https://img.shields.io/badge/Swift-5.9-orange)](https://swift.org/)
@@ -25,7 +25,7 @@
 
 ### 方式一：直接下载（推荐）
 
-1. 下载最新的 `MacroRecorder.app`
+1. 下载最新的 `行为录制精灵.app`
 2. 将应用拖动到「应用程序」文件夹
 3. 首次运行时需要在「系统设置 > 隐私与安全性 > 辅助功能」中授予权限
 
