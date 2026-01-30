@@ -19,6 +19,37 @@ if [ -d "${APP_DIR}" ]; then
     rm -rf "${APP_DIR}"
 fi
 
+# 检查图标文件
+if [ ! -f "AppIcon.icns" ]; then
+    echo "⚠️  未找到 AppIcon.icns，正在生成..."
+    
+    # 复制原始图标
+    cp "Assets.xcassets/AppIcon.appiconset/AppIcon.png" /tmp/AppIcon.png
+    
+    # 创建临时 iconset 目录
+    mkdir -p /tmp/AppIcon.iconset
+    
+    # 生成不同尺寸
+    sips -z 16 16 /tmp/AppIcon.png --out /tmp/AppIcon.iconset/icon_16x16.png
+    sips -z 32 32 /tmp/AppIcon.png --out /tmp/AppIcon.iconset/icon_16x16@2x.png
+    sips -z 32 32 /tmp/AppIcon.png --out /tmp/AppIcon.iconset/icon_32x32.png
+    sips -z 64 64 /tmp/AppIcon.png --out /tmp/AppIcon.iconset/icon_32x32@2x.png
+    sips -z 128 128 /tmp/AppIcon.png --out /tmp/AppIcon.iconset/icon_128x128.png
+    sips -z 256 256 /tmp/AppIcon.png --out /tmp/AppIcon.iconset/icon_128x128@2x.png
+    sips -z 256 256 /tmp/AppIcon.png --out /tmp/AppIcon.iconset/icon_256x256.png
+    sips -z 512 512 /tmp/AppIcon.png --out /tmp/AppIcon.iconset/icon_256x256@2x.png
+    sips -z 512 512 /tmp/AppIcon.png --out /tmp/AppIcon.iconset/icon_512x512.png
+    sips -z 1024 1024 /tmp/AppIcon.png --out /tmp/AppIcon.iconset/icon_512x512@2x.png
+    
+    # 生成 icns
+    iconutil --convert icns --output AppIcon.icns /tmp/AppIcon.iconset
+    
+    # 清理临时文件
+    rm -rf /tmp/AppIcon.iconset /tmp/AppIcon.png
+    
+    echo "✅ AppIcon.icns 生成完成"
+fi
+
 # 构建项目
 echo "构建项目..."
 swift build
@@ -37,19 +68,15 @@ echo "可执行文件: ${EXECUTABLE_PATH}"
 echo "创建 app bundle..."
 mkdir -p "${MACOS_DIR}"
 mkdir -p "${RESOURCES_DIR}"
-mkdir -p "${RESOURCES_DIR}/Assets.xcassets/AppIcon.appiconset"
 
 # 复制可执行文件
 cp "${EXECUTABLE_PATH}" "${MACOS_DIR}/${EXECUTABLE_NAME}"
 chmod +x "${MACOS_DIR}/${EXECUTABLE_NAME}"
 
-# 复制图标资源
-cp "Assets.xcassets/Contents.json" "${RESOURCES_DIR}/Assets.xcassets/"
-cp "Assets.xcassets/AppIcon.appiconset/Contents.json" "${RESOURCES_DIR}/Assets.xcassets/AppIcon.appiconset/"
-if [ -f "Assets.xcassets/AppIcon.appiconset/AppIcon.png" ]; then
-    cp "Assets.xcassets/AppIcon.appiconset/AppIcon.png" "${RESOURCES_DIR}/Assets.xcassets/AppIcon.appiconset/"
-    echo "✅ 图标已复制"
-fi
+# 复制图标文件
+echo "复制图标文件..."
+cp "AppIcon.icns" "${RESOURCES_DIR}/"
+echo "✅ 图标已复制: ${RESOURCES_DIR}/AppIcon.icns"
 
 # 复制 entitlements 文件
 cp "MacroRecorder.entitlements" "${CONTENTS_DIR}/"
@@ -96,6 +123,14 @@ cat > "${CONTENTS_DIR}/Info.plist" << EOF
 </plist>
 EOF
 
+# 使用 SetFile 设置自定义图标（备用方法）
+if command -v SetFile &> /dev/null; then
+    echo "设置自定义图标..."
+    SetFile -t ICNS "${RESOURCES_DIR}/AppIcon.icns" 2>/dev/null || true
+    SetFile -a C "${APP_DIR}" 2>/dev/null || true
+    echo "✅ 自定义图标设置完成"
+fi
+
 echo ""
 echo "==========================================="
 echo "     打包完成! ✅"
@@ -103,6 +138,7 @@ echo "==========================================="
 echo ""
 echo "📦 应用位置: $(pwd)/${APP_DIR}"
 echo "📱 应用名称: ${APP_NAME}"
+echo "🎨 图标文件: ${RESOURCES_DIR}/AppIcon.icns"
 echo ""
 echo "✨ 新功能:"
 echo "   • 支持深色模式自动适配"
